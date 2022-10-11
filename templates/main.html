@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load cache %}
 <html lang="en">
 
   <head>
@@ -12,7 +13,9 @@
   </head>
 
   <body>
+        {%  cache 50 navibar request.user.username  %}
       {%  include 'navbar.html' %}
+        {% endcache %}
 
         {% if messages %}
         <ul class="messages">

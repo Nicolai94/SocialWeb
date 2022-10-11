@@ -8,12 +8,12 @@ urlpatterns = [
     path('register/', RegisterPage.as_view(), name='register'), #ok
 
     path('', HomeView.as_view(), name='home'), #ok
-    path('room/<str:pk>/', RoomPage.as_view(), name='room'), #ok
+    path('room/<str:slug>/', RoomPage.as_view(), name='room'), #ok
     path('profile/<str:pk>/', UserProfile.as_view(), name='user_profile'), #ok
 
     path('create-room/', CreateRoom.as_view(), name='create-room'), #ok
-    path('update-room/<str:pk>/', UpdateRoom.as_view(), name='update-room'), #ok
-    path('delete-room/<str:pk>/', DeleteRoomPage.as_view(), name='delete-room'), #ok
+    path('update-room/<str:slug>/', UpdateRoom.as_view(), name='update-room'), #ok
+    path('delete-room/<str:slug>/', DeleteRoomPage.as_view(), name='delete-room'), #ok
     path('delete-message/<str:pk>/', DeleteMessageRoom.as_view(), name='delete-message'), #ok
 
     path('update-user/', UpdateUser.as_view(), name='update-user'), #ok

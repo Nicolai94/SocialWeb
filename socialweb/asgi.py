@@ -7,7 +7,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 
 import base.routing
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangochat.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'socialweb.settings')
 
 application = ProtocolTypeRouter({
     'http': get_asgi_application(),

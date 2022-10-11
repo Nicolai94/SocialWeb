@@ -26,6 +26,7 @@ class TopicAdmin(admin.ModelAdmin):
 class RoomAdmin(admin.ModelAdmin):
     list_display = ['host', 'topic', 'name', 'description', 'created']
     list_filter = ['created']
+    prepopulated_fields = {'slug': ('name',)}
     search_fields = ['topic']
     save_as = True
     save_on_top = True

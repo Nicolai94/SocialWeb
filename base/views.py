@@ -9,6 +9,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import *
+from django.views.generic.list import MultipleObjectMixin
+
 from base.forms import *
 
 
@@ -23,12 +25,13 @@ class HomeView(TemplateView):
                                     Q(description__icontains=q))
         topics = Topic.objects.all()[0:5]
         room_count = rooms.count()
-        room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
+        room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))[:5]
         context['rooms'] = rooms
         context['topics'] = topics
         context['room_count'] = room_count
         context['room_messages'] = room_messages
         return context
+
 
 
 class CustomLoginView(FormView):
@@ -70,13 +73,15 @@ class CustomLogoutView(View):
         return redirect('home')
 
 
-class RoomPage(UpdateView):
+class RoomPage(LoginRequiredMixin, UpdateView):
+    login_url = 'login'
+    redirect_field_name = 'home'
     model = Room
     template_name = 'base/room.html'
 
     def get_context_data(self, **kwargs):
-        pk = self.kwargs['pk']
-        room = Room.objects.get(id=pk)
+        slug = self.kwargs['slug']
+        room = Room.objects.get(slug=slug)
         room_messages = room.message_set.all().order_by('-created')
         participants = room.participants.all()
         context = {'room': room,
@@ -85,20 +90,21 @@ class RoomPage(UpdateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        pk = self.kwargs['pk']
-        room = Room.objects.get(id=pk)
+        slug = self.kwargs['slug']
+        room = Room.objects.get(slug=slug)
         Message.objects.create(
             user=request.user,
             room=room,
             body=request.POST.get('body')
         )
         room.participants.add(request.user)
-        return redirect('room', pk=room.id)
+        return redirect('room', slug=room.slug)
 
 
 class TopicsPage(ListView):
     template_name = 'base/topics.html'
     context_object_name = 'topics'
+
 
     def get_queryset(self):
         q = self.request.GET.get('q') if self.request.GET.get('q') != None else ''
@@ -108,7 +114,7 @@ class TopicsPage(ListView):
 
 class ActivitiesPage(ListView):
     template_name = 'base/activity.html'
-    queryset = Message.objects.all()
+    queryset = Message.objects.all().order_by('-id')[:5]
     context_object_name = 'room_messages'
 
 
@@ -164,17 +170,17 @@ class UpdateRoom(LoginRequiredMixin,UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        pk = self.kwargs['pk']
-        room = Room.objects.get(id=pk)
+        slug = self.kwargs['slug']
+        room = Room.objects.get(slug=slug)
         topics = Topic.objects.all()
         context['topics'] = topics
         context['room'] = room
         return context
 
     def post(self, request, *args, **kwargs):
-        pk = self.kwargs['pk']
+        slug = self.kwargs['slug']
         form = RoomForm(request.POST)
-        room = Room.objects.get(id=pk)
+        room = Room.objects.get(slug=slug)
         topic_name = request.POST.get('topic')
         topic = Topic.objects.get(name=topic_name)
         room.name = request.POST.get('name')
